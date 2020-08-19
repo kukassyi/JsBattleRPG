@@ -122,17 +122,8 @@ let setCommandFunc = function (e) {
             }
             //今入力している人の順番をカウントアップ
             ++membernum;
-            //死者を数える
-            let dethNum = 0;
-            for (let i = 0; i < partyMember.length; i++) {
-                if (partyMember[i].HP <= 0) {
-                    ++dethNum;
-                }
-            }
-            console.log("dethNum::" + dethNum);
-            console.log("membernum::" + membernum);
             //生きている人分コマンド入力が終わったら終了
-            if (membernum >= 3 - dethNum) {
+            if (membernum >= partyMember.length) {
                 //コマンド入力状態を戦闘状態に変更
                 onCommandInput = false;
                 membernum = 0;//コマンド入力メンバー順序をクリア
