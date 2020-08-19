@@ -127,39 +127,6 @@ let excecMainBattle = function () {
     }
 }
 
- let  battleSeaq = function () {
- 
-    if (turnCounter == 0) {
-        allBattleTurn = setBattleTurn();
-    }
-    excecMainBattle();
-    ++turnCounter;
-
-    //戦闘終了処理
-    if (allBattleTurn.length <= turnCounter) {
-        onCommandInput = true;
-        turnCounter = 0;
-        selectedCommands = [];
-        command = 0;
-        //防御の場合は防御を解く
-        allBattleTurn.filter(o => o.member.isDiffending == true)
-            .forEach(o => o.member.difence = o.member.difence / 2);
-        allBattleTurn.filter(o => o.member.isDiffending == true)
-            .forEach(o => o.member.isDiffending = false);
-
-        //敵の矢印位置を合わせる
-        for (let i = 0; i < monsters.length; i++) {
-            if (monsters[i].HP > 0) {
-                drawCommandRect.drawImage(monsters[i].posX + monsters[i].sizeX / 2);
-                taisyou = i;
-                break;
-            }
-        }
-        return false;
-    }
-    return true;
-}
-
 //最初に呼び出され、戦闘の順序決めと実行
 let turnCounter = 0;
 let  excecBattleManage = function (e) {
