@@ -30,52 +30,41 @@ class Human {
             console.log(enemy.HP);
             return false;
         }
-
+        let lifeValue = 0;
         //ダメージ計算
-        let lifeValue = Math.floor(enemy.HP - (Power * (1 + getRandomInt(9) * 0.1)
-                                                    -enemy.difence/8));
-
-        //敵キャラ点滅処理
-         blinkManage(enemy);
-
-        console.log("life:" + lifeValue);
+        lifeValue = Math.floor(enemy.HP - (Power * (1 + getRandomInt(9) * 0.1)
+            - enemy.difence / 8));
         if (lifeValue <= 0) {
             lifeValue = 0;
-            //非同期処理待ち
-            setTimeout(
-                function () {
-                    enemy.deleteImage();
-                },
-                400
-            );
-
-        } else {
-            //非同期処理待ち
-            setTimeout(
-                function () {
-                    enemy.drawImage();
-                },
-                400
-            );
         }
         enemy.HP = lifeValue;
+        //敵キャラ点滅処理
+        blinkManage(enemy).then(() => {
+            if (enemy.HP <= 0) {
+                enemy.deleteImage();     
+            } else {
+                enemy.drawImage(); 
+            }
+        });
+
+        console.log("life:" + lifeValue);
         return true;
     }
 
     masic() { }
 
-    diffend() { 
+    diffend() {
         this.isDiffending = true;
-        this.difence = this.difence*2;
+        this.difence = this.difence * 2;
     }
 
-    defendReleace(){
+    defendReleace() {
         this.isDiffending = false;
-        this.difence = this.difence/2;
+        this.difence = this.difence / 2;
     }
 
-    
-    escape(){}
+
+    escape() { }
 
     item() { }
 
@@ -136,23 +125,35 @@ function stopTimer() {
     clearInterval(blinkTimer);
 }
 
+let doOK=true;
 let blinkManage = function (enemy) {
-     startTimer(enemy);
-    setTimeout(
-        function () {
+    if(!doOK){
+        //完了前に連続実行された場合は実行しない
+        return new Promise((resolve, reject) => {
             stopTimer();
-        },
-        200
-    );
+            doOKDisp=true;
+            resolve();
+        });
+    }
+    startTimer(enemy);
+    doOK=false;
+    return new Promise((resolve, reject) => {
+        setTimeout(
+            function () {
+                stopTimer();
+                doOK=true;
+                resolve();
+            },
+            200
+        );
+    });
 }
 
 let blinkflg = true;
 let blink = function (enemy) {
     if (blinkflg) {
-
         enemy.deleteImage();
     } else {
-
         enemy.drawImage();
     }
     blinkflg = !blinkflg;

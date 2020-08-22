@@ -32,16 +32,14 @@ class Monster {
 
     let lifeValue = Math.floor(enemy.HP - (Power * (1 + getRandomInt(9) * 0.1)
       - enemy.difence / 8));
-
+      if (lifeValue <= 0) {
+        lifeValue = 0;
+      }
+      enemy.HP = lifeValue;
     //画面点滅処理
-    blinkManageDisp();
-    canvas.style.backgroundColor = 'black';
-    if (lifeValue <= 0) {
-      lifeValue = 0;
-
-    }
-    enemy.HP = lifeValue;
-
+      blinkManageDisp().then(() => {
+        canvas.style.backgroundColor = 'black';
+      });
     return true;
   }
 
@@ -253,27 +251,37 @@ function getMonsterInstance(getMonNum, posX) {
 //画面点滅処理
 let blinkTimerDisp;
 function startTimerDisp() {
-    blinkTimerDisp = setInterval(function () {
-      blinkDisp();
-    }, 100);
-
+  blinkTimerDisp = setInterval(function () {
+    blinkDisp();
+  }, 100);
 }
 
 function stopTimerDisp() {
-
-    clearInterval(blinkTimerDisp);
-
+  clearInterval(blinkTimerDisp);
 }
 
+let doOKDisp=true;
 let blinkManageDisp = function () {
-
-   startTimerDisp();
-   setTimeout(
-     function () {
-       stopTimerDisp();
+  if(!doOKDisp){
+    //完了前に連続実行された場合は実行しない
+    return new Promise((resolve, reject) => {
+      stopTimerDisp();
+      doOKDisp=true;
+        resolve();
+    });
+}
+  startTimerDisp();
+  doOKDisp=false;
+  return new Promise((resolve, reject) => {
+  setTimeout(
+    function () {
+      stopTimerDisp();
+      doOKDisp=true;
+      resolve();
     },
     200
   );
+});
 }
 
 let blinkDispflg = true;

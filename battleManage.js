@@ -63,6 +63,8 @@ let excecMainBattle = function () {
                     allBattleTurn[turnCounter].member.attack(
                         allBattleTurn[turnCounter].target,
                         allBattleTurn[turnCounter].member.Power);
+
+                    //TODO パーティーメンバーが攻撃を受けた時のみ更新するように判別式追加
                     drawMemberProperty(partyMember);
 
                     let damage = beforHP - allBattleTurn[turnCounter].target.HP;
