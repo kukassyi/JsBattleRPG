@@ -25,3 +25,12 @@ drawCommandRect.drawImage(monsters[0].posX + monsters[0].sizeX/2);
 
 let drawMessageRect = new DrawMessageRect();
 drawMessageRect.drawFlame();
+
+
+let newContextInstance = new ContextState(new CommandState());
+
+window.addEventListener("keydown", (e) => {
+
+    newContextInstance.contextExcec(e);
+    
+});

@@ -130,7 +130,6 @@ let blinkManage = function (enemy) {
     if(!doOK){
         //完了前に連続実行された場合は実行しない
         return new Promise((resolve, reject) => {
-            stopTimer();
             doOKDisp=true;
             resolve();
         });

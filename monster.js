@@ -265,9 +265,8 @@ let blinkManageDisp = function () {
   if(!doOKDisp){
     //完了前に連続実行された場合は実行しない
     return new Promise((resolve, reject) => {
-      stopTimerDisp();
       doOKDisp=true;
-        resolve();
+      resolve();
     });
 }
   startTimerDisp();

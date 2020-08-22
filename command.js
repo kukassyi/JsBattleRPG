@@ -66,79 +66,89 @@ let membernum = 0;
 let dethNum = 0;
 
 let selectedCommands = [];
-let setCommandFunc = function (e) {
-    if (e.key === "ArrowLeft") {
-        if (0 < taisyou) {
-            console.log(taisyou);
-            taisyou -= 1
-            //斃されたモンスターを除外する
-            while (!setEnemyArrowImg(monsters[taisyou])) {
-                if (0 >= taisyou) {
-                    //左端が選択された場合は右端に遷移
-                    taisyou = monsters.length - 1;
-                } else {
-                    taisyou -= 1;
+
+class CommandState extends ContextState {
+    // constructor(state) {
+    //     this.state = state;
+    // }
+
+
+    excecCommand(e) {
+        if (e.key === "Enter") {
+            //死んでるモンスターは選択しない
+            if (monsters[taisyou].HP > 0) {
+                //生きているメンバーのみ戦闘に加わる
+                if (partyMember[membernum].HP > 0) {
+                    selectedCommands.push(new Command(partyMember[membernum],
+                        COMMAND_KIND[command], monsters[taisyou]));
+
+                    pringMessage(partyMember[membernum].name + "が"
+                        + monsters[taisyou].name + "に" + COMMAND_NAME[command]);
+                }
+                //今入力している人の順番をカウントアップ
+                ++membernum;
+                //生きている人分コマンド入力が終わったら終了
+                if (membernum >= partyMember.length) {
+                    //コマンド入力状態を戦闘状態に変更
+                    onCommandInput = false;
+                    membernum = 0;//コマンド入力メンバー順序をクリア
+                    //矢印クリア
+                    ctx.clearRect(20, ENEMY_ARROW_DEFAULT_START_Y - 10, CANVAS_SIZE_W, 35);
+                    ctx.clearRect(COMMAND_ARROW_DEFAULT_START_X - 2,
+                        COMMAND_ARROW_DEFAULT_START_Y - 10, 23, 140);
+                    return new BattleState();
                 }
             }
         }
-    }
-    if (e.key === "ArrowUp") {
-        if (0 < command) {
-            command -= 1
-            setCommandArrowImg(command);
-        }
-    }
-    if (e.key === "ArrowRight") {
-
-        if (monsters.length - 1 > taisyou) {
-            taisyou += 1
-            while (!setEnemyArrowImg(monsters[taisyou])) {
-                if (monsters.length - 1 <= taisyou) {
-                    //左端が選択された場合は右端に遷移
-                    taisyou = 0;
-                } else {
-                    taisyou += 1;
+        if (e.key === "ArrowLeft") {
+            if (0 < taisyou) {
+                console.log(taisyou);
+                taisyou -= 1
+                //斃されたモンスターを除外する
+                while (!setEnemyArrowImg(monsters[taisyou])) {
+                    if (0 >= taisyou) {
+                        //左端が選択された場合は右端に遷移
+                        taisyou = monsters.length - 1;
+                    } else {
+                        taisyou -= 1;
+                    }
                 }
             }
         }
-    }
-    if (e.key === "ArrowDown") {
-        if (COMMAND_KIND.length - 1 > command) {
-            command += 1
-            setCommandArrowImg(command);
-        }
-    }
-    if (e.key === "Enter") {
-
-        //死んでるモンスターは選択しない
-        if (monsters[taisyou].HP > 0) {
-            //生きているメンバーのみ戦闘に加わる
-            if (partyMember[membernum].HP > 0) {
-                selectedCommands.push(new Command(partyMember[membernum],
-                    COMMAND_KIND[command], monsters[taisyou]));
-
-                pringMessage(partyMember[membernum].name + "が"
-                + monsters[taisyou].name + "に" + COMMAND_NAME[command] );
-            }
-            //今入力している人の順番をカウントアップ
-            ++membernum;
-            //生きている人分コマンド入力が終わったら終了
-            if (membernum >= partyMember.length) {
-                //コマンド入力状態を戦闘状態に変更
-                onCommandInput = false;
-                membernum = 0;//コマンド入力メンバー順序をクリア
-                //矢印クリア
-                ctx.clearRect(20, ENEMY_ARROW_DEFAULT_START_Y - 10, CANVAS_SIZE_W, 35);
-                ctx.clearRect(COMMAND_ARROW_DEFAULT_START_X - 2,
-                    COMMAND_ARROW_DEFAULT_START_Y - 10, 23, 140);
+        if (e.key === "ArrowUp") {
+            if (0 < command) {
+                command -= 1
+                setCommandArrowImg(command);
             }
         }
-    }
-    if (e.keyCode == 32) {
-        //↓テスト用
-        // mon.attack(partyMember[1]);
-        // drawMemberProperty(partyMember);
-        //↑テスト用
+        if (e.key === "ArrowRight") {
+
+            if (monsters.length - 1 > taisyou) {
+                taisyou += 1
+                while (!setEnemyArrowImg(monsters[taisyou])) {
+                    if (monsters.length - 1 <= taisyou) {
+                        //左端が選択された場合は右端に遷移
+                        taisyou = 0;
+                    } else {
+                        taisyou += 1;
+                    }
+                }
+            }
+        }
+        if (e.key === "ArrowDown") {
+            if (COMMAND_KIND.length - 1 > command) {
+                command += 1
+                setCommandArrowImg(command);
+            }
+        }
+
+        if (e.keyCode == 32) {
+            //↓テスト用
+            // mon.attack(partyMember[1]);
+            // drawMemberProperty(partyMember);
+            //↑テスト用
+        }
+        return this;
     }
 }
 

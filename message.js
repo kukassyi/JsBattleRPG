@@ -34,14 +34,3 @@ let crearMessage = function(){
     ctx.clearRect(160, 310, 400, 140);
 }
 
-let endBattleLose = function(){
-    messageDipsList=[];
-    ctx.clearRect(160, 310, 400, 140);
-    pringMessage("パーティは全滅しました");
-}
-
-let endBattleWin= function(){
-    messageDipsList=[];
-    ctx.clearRect(160, 310, 400, 140);
-    pringMessage("モンスターを倒した");
-}

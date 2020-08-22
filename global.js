@@ -10,17 +10,30 @@ const ctx = canvas.getContext("2d")
 
 let onCommandInput = true;
 let battleEnd = false;
-window.addEventListener("keydown", (e) => {
-    if(battleEnd){
-        return;
-    }
 
-    if(onCommandInput){
-        setCommandFunc(e);
-    }else{
-        excecBattleManage(e);
+
+class ContextState {
+    constructor(state) {
+        this.state = state;
     }
+    changeState(state){
+        this.state = state;
+    }
+    contextExcec(e){
+        this.state = this.state.excecCommand(e);
+    }
+} 
+
+
+
+
+
+
+
+   
     
-});
+
+
+
 
 
