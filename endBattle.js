@@ -9,8 +9,10 @@ class EndBattleState extends ContextState {
     excecCommand(e) {
         if (this.winOrLose == "win") {
             this.endBattleWin();
-        } else {
+        } else if (this.winOrLose == "lose"){
             this.endBattleLose();
+        } else if (this.winOrLose == "escape"){
+            this.endBattleeEcape();
         }
         return this;
     }
@@ -25,6 +27,12 @@ class EndBattleState extends ContextState {
         messageDipsList = [];
         ctx.clearRect(160, 310, 400, 140);
         pringMessage("モンスターを倒した");
+    }
+
+    endBattleeEcape() {
+        messageDipsList = [];
+        ctx.clearRect(160, 310, 400, 140);
+        pringMessage("逃げました");
     }
 
 }

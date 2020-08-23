@@ -41,9 +41,9 @@ class Human {
         //敵キャラ点滅処理
         blinkManage(enemy).then(() => {
             if (enemy.HP <= 0) {
-                enemy.deleteImage();     
+                enemy.deleteImage();
             } else {
-                enemy.drawImage(); 
+                enemy.drawImage();
             }
         });
 
@@ -51,7 +51,42 @@ class Human {
         return true;
     }
 
-    masic() { }
+    masic(enemy, masicKind) {
+        if (enemy.HP <= 0) {
+            return false;
+        }
+        let lifeValue = 0;
+
+        if (masicKind == "care") {
+            //回復量計算
+            lifeValue = Math.floor(enemy.HP + (this.masicOffence) * (1 + getRandomInt(9) * 0.1));
+            enemy.HP = lifeValue;
+
+            doMemberMasicPerform(masicKind);
+        } else {
+            //ダメージ計算
+            lifeValue = Math.floor(enemy.HP - (this.masicOffence) * (1.5 + getRandomInt(9) * 0.1)
+                - enemy.masicDifence / 8);
+            if (lifeValue <= 0) {
+                lifeValue = 0;
+            }
+            enemy.HP = lifeValue;
+
+            //敵キャラ演出処理
+            doMasicPerform(enemy, masicKind,canMasicSpelling).then(() => {
+                //敵キャラ点滅処理
+                blinkManage(enemy).then(() => {
+                    if (enemy.HP <= 0) {
+                        enemy.deleteImage();
+                    } else {
+                        enemy.drawImage();
+                    }
+                });
+            });
+        }
+        console.log("life:" + lifeValue);
+        return true;
+    }
 
     diffend() {
         this.isDiffending = true;
@@ -62,12 +97,6 @@ class Human {
         this.isDiffending = false;
         this.difence = this.difence / 2;
     }
-
-
-    escape() { }
-
-    item() { }
-
 }
 
 class Warrier extends Human {
@@ -75,8 +104,8 @@ class Warrier extends Human {
     constructor() {
         super();
         this.HP = 150 + getRandomInt(100);
-        this.MP = 10;
-        this.Power = 20 + getRandomInt(20);
+        this.MP = 8;
+        this.Power = 50 + getRandomInt(20);
         this.masicOffence = 10;
         this.quickness = 50 + getRandomInt(10);
         this.difence = 55 + getRandomInt(20);
@@ -91,11 +120,35 @@ class Warrier extends Human {
     }
 }
 
+
+class Wizard extends Human {
+
+    constructor() {
+        super();
+        this.HP = 80 + getRandomInt(50);
+        this.MP = 80 + getRandomInt(50);
+        this.Power = 10 + getRandomInt(10);
+        this.masicOffence = 60;
+        this.quickness = 30 + getRandomInt(10);
+        this.difence = 35 + getRandomInt(10);
+        this.masicDifence = 50 + getRandomInt(30);
+        this.Level = 5 + getRandomInt(5);
+        this.isDiffending = false;
+        this.name = "メンバー" + getRandomInt(100);
+        this.job = "魔術師";
+    }
+    attack(enemy) {
+        return super.attack(enemy, this.Power);
+    }
+}
+
+
+
 let getNewPartyMember = function () {
     let partyMembarList = [];
-    partyMembarList.push(new Warrier);
-    partyMembarList.push(new Warrier);
-    partyMembarList.push(new Warrier);
+    partyMembarList.push(new Warrier());
+    partyMembarList.push(new Warrier());
+    partyMembarList.push(new Wizard());
 
     return partyMembarList;
 }
@@ -113,6 +166,97 @@ let drawMemberProperty = function (partyMembarList) {
 
 }
 
+
+let isMemberPerformOK = true;
+let doMemberMasicPerform = function (masicKind,canMasicSpelling) {
+    if (!isMemberPerformOK) {
+        //完了前に連続実行された場合は実行しない
+        return new Promise((resolve, reject) => {
+            isMemberPerformOK = true;
+            resolve();
+        });
+    }
+    ///演出処理開始
+    drawMemberPerform(masicKind);
+    isMemberPerformOK = false;
+    return new Promise((resolve, reject) => {
+        setTimeout(
+            function () {
+                //演出削除処理
+                drawMemberProperty(partyMember);
+                ctx.strokeRect(10, 10, 420, 120);
+                ctx.fillText('HP', 40, 40);
+                ctx.fillText('MP', 40, 60);
+                ctx.fillText('LV', 40, 80);
+                ctx.fillText('名前', 40, 100);
+                ctx.fillText('職業', 40, 120);
+        
+                ctx.stroke();
+                isMemberPerformOK = true;
+                resolve();
+            },
+            400
+        );
+    });
+
+}
+
+//画像表示
+function drawMemberPerform(masicKind) {
+
+    const img = new Image();
+    if(masicKind == "care"){
+        img.src = "care.png";
+    }
+    img.onload = () => ctx.drawImage(img, 10, 10, 420, 120);
+}
+
+//モンスター側演出処理
+let isPerformOK = true;
+let doMasicPerform = function (enemy, masicKind) {
+    if (!isPerformOK) {
+        //完了前に連続実行された場合は実行しない
+        return new Promise((resolve, reject) => {
+            isPerformOK = true;
+            resolve();
+        });
+    }
+    //演出処理開始
+    drawEnemyPerform(enemy, masicKind);
+    isPerformOK = false;
+    return new Promise((resolve, reject) => {
+        setTimeout(
+            function () {
+                //演出削除処理
+                deletePerform(enemy)
+                isPerformOK = true;
+                resolve();
+            },
+            400
+        );
+    });
+}
+
+//画像表示
+function drawEnemyPerform(enemy, masicKind) {
+
+    const img = new Image();
+    if(masicKind == "fire"){
+        img.src = "fire.png";
+    }else if(masicKind == "apaman"){
+        img.src = "apaman.png";
+    }    
+    img.onload = () => ctx.drawImage(img, enemy.posX, enemy.posY, enemy.sizeX, enemy.sizeY);
+}
+
+
+
+//演出削除＋モンスター再描画
+function deletePerform(enemy) {
+    enemy.deleteImage();
+    enemy.drawImage();
+}
+
 //敵キャラ点滅処理
 let blinkTimer;
 function startTimer(enemy) {
@@ -125,22 +269,22 @@ function stopTimer() {
     clearInterval(blinkTimer);
 }
 
-let doOK=true;
+let doOK = true;
 let blinkManage = function (enemy) {
-    if(!doOK){
+    if (!doOK) {
         //完了前に連続実行された場合は実行しない
         return new Promise((resolve, reject) => {
-            doOKDisp=true;
+            doOKDisp = true;
             resolve();
         });
     }
     startTimer(enemy);
-    doOK=false;
+    doOK = false;
     return new Promise((resolve, reject) => {
         setTimeout(
             function () {
                 stopTimer();
-                doOK=true;
+                doOK = true;
                 resolve();
             },
             200

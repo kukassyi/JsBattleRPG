@@ -26,9 +26,10 @@ drawCommandRect.drawImage(monsters[0].posX + monsters[0].sizeX/2);
 let drawMessageRect = new DrawMessageRect();
 drawMessageRect.drawFlame();
 
-
+//StateパータンのState+Contextのインスタンス化、最初はコマンド入力モード
 let newContextInstance = new ContextState(new CommandState());
 
+//Stateパターンでエンター押下時の処理を分岐する
 window.addEventListener("keydown", (e) => {
 
     newContextInstance.contextExcec(e);

@@ -9,12 +9,10 @@ let setMonsterCommands = function () {
             while (pm.HP <= 0) {
                 pm = partyMember[getRandomInt(3)];
             }
-
             commandMonsters.push(new Command(
-                monsters[i], "attack", pm));
+                monsters[i], "attack", "", pm));
         }
     }
-
     return commandMonsters;
 }
 
@@ -44,7 +42,7 @@ let setBattleTurn = function () {
 
     return allBattleTurn;
 }
-
+let canMasicSpelling=true;
 //戦闘実行
 let excecMainBattle = function () {
 
@@ -88,11 +86,77 @@ let excecMainBattle = function () {
                 }
                 break;
             case "escape":
+                ctx.clearRect(160, 310, 400, 140);
+                pringMessage(allBattleTurn[turnCounter].member.name + "は逃げ出した");
+                //メンバーの平均素早さとモンスターの平均素早さで判定する
+                let monsterQuick = 0;
+                for (let i = 0; i < monsters.length; i++) {
+                    monsterQuick = monsterQuick + monsters[i].quickness;
+                }
+                let avgMonQuick = monsterQuick / monsters.length;
 
+                let playerQuick = 0;
+                for (let i = 0; i < partyMember.length; i++) {
+                    playerQuick = playerQuick + partyMember[i].quickness;
+                }
+                let avgPlayerQuick = playerQuick / partyMember.length;
+
+                let isSuccess = false;
+                //判定
+                if ((avgPlayerQuick - avgMonQuick) >= 0) {
+                    //素早さが勝った時
+                    if (getRandomInt(10) > 2) {
+                        isSuccess = true;//7割り成功
+                    }
+                } else {
+                    //素早さが負けた時
+                    if (getRandomInt(10) > 6) {
+                        isSuccess = true;//3割り成功
+                    }
+                }
+                //判定結果
+                if (isSuccess) {
+                    return 3;
+                } else {
+                    //ふるぼっこ
+                    ctx.clearRect(160, 310, 400, 140);
+                    pringMessage("しかし回り込まれてしまった");
+                    let commandMonsters = [];
+                    commandMonsters = setMonsterCommands();
+                    //攻撃スレッドにモンスター分だけ追加して攻撃を受ける
+                    Array.prototype.splice.apply(allBattleTurn, [turnCounter + 1, 0]
+                        .concat(commandMonsters));
+                }
                 break;
             case "diffend":
                 allBattleTurn[turnCounter].member.diffend();
                 pringMessage(allBattleTurn[turnCounter].member.name + "は防御している");
+                break;
+            case "masic":
+                if(canMasicSpelling){
+                    pringMessage(allBattleTurn[turnCounter].member.name + "は" + 
+                    COMMAND_MASIC_NAME[COMMAND_MASIC_KIND.indexOf(allBattleTurn[turnCounter].masicKind)]
+                    + "を唱えた");
+                    //MPを減らす
+                    allBattleTurn[turnCounter].member.MP = allBattleTurn[turnCounter].member.MP
+                    - MASIC_PROPERTY_USEMP[COMMAND_MASIC_KIND.indexOf(allBattleTurn[turnCounter].masicKind)];
+                }   
+                
+                let beforHP = allBattleTurn[turnCounter].target.HP;
+                allBattleTurn[turnCounter].member.masic(
+                    allBattleTurn[turnCounter].target,
+                    allBattleTurn[turnCounter].masicKind,canMasicSpelling);
+                let damage = beforHP - allBattleTurn[turnCounter].target.HP;
+
+                if(beforHP>0 && damage>=0){
+                    pringMessage(allBattleTurn[turnCounter].target.name + "に" + damage + "のダメージ");
+                }else if(damage < 0){
+                    damage = -1 * damage;
+                    pringMessage(allBattleTurn[turnCounter].target.name + "が" + damage + "だけ回復");
+
+                }
+                drawMemberProperty(partyMember);
+                canMasicSpelling=false;
                 break;
         }
         //戦闘終了チェック
@@ -143,12 +207,15 @@ class BattleState extends ContextState {
                 return new EndBattleState("win");
             } else if (winOrLose == 2) {
                 return new EndBattleState("lose");
+            } else if (winOrLose == 3) {
+                return new EndBattleState("escape");
             }
             ++turnCounter;
 
             //ターン終了処理
             if (allBattleTurn.length <= turnCounter) {
                 onCommandInput = true;
+                canMasicSpelling=true;
                 turnCounter = 0;
                 selectedCommands = [];
                 command = 0;
